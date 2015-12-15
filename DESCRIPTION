@@ -1,0 +1,17 @@
+Package: riskCalc
+Type: Package
+Title: Risk Calculation System -- MATH G4082 Project
+Version: 0.1-1
+Date: 2015-12-14
+Author: Kaidong Zhang, Weicong Wang, Chenxing Ouyang
+Maintainer: Kaidong Zhang <kz2236@columbia.edu>
+Description: The riskCalc package provides a risk calculation system that
+    is able to (1) compute Monte Carlo, historical, and parametric VaR for a
+    portfolio of stock and option positions; (2) both calibrate to historical
+    data and take parameters as input; (3) backtest the VaR against historical
+    data.
+License: GPL (>=2)
+Imports:
+    plyr,
+    mvtnorm
+RoxygenNote: 5.0.1
