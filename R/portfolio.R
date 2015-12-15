@@ -37,26 +37,26 @@ portfolio <- function(data, Names, weights, V0 = 1)
   weights <- portfolioWeight(weights)
   r <- subset(data, Names)
 
-  pfReturn <- sumWeights <- numeric(r$N)
-  for(i in seq_along(Names)) {
-    if(Names[i] %in% r$stockNames) {
-      pfReturn <- pfReturn + weights[i] *
-        (if(attr(weights, "unit")=="share") c(r$price[-1,Names[i]],NA) else 1) *
-        exp(r$logReturn[,Names[i]])
-      sumWeights <- sumWeights + weights[i] *
-        (if(attr(weights, "unit")=="share") c(r$price[-1,Names[i]],NA) else 1)
-    }
-    else {
-      pfReturn <- pfReturn + weights[i] * 
-        (if(attr(weights, "unit")=="share") c(r$premium[-1,Names[i]],NA) else 1) *
-        exp(r$opReturn[,Names[i]])
-      sumWeights <- sumWeights + weights[i] *
-        (if(attr(weights, "unit")=="share") c(r$premium[-1,Names[i]],NA) else 1)
-    }
-  }
-  pfReturn <- log(pfReturn / sumWeights)
-  
-  r$pfReturn <- data.frame(Date=r$price[,1], pfReturn=pfReturn)
+#   pfReturn <- sumWeights <- numeric(r$N)
+#   for(i in seq_along(Names)) {
+#     if(Names[i] %in% r$stockNames) {
+#       pfReturn <- pfReturn + weights[i] *
+#         (if(attr(weights, "unit")=="share") c(r$price[-1,Names[i]],NA) else 1) *
+#         exp(r$logReturn[,Names[i]])
+#       sumWeights <- sumWeights + weights[i] *
+#         (if(attr(weights, "unit")=="share") c(r$price[-1,Names[i]],NA) else 1)
+#     }
+#     else {
+#       pfReturn <- pfReturn + weights[i] * 
+#         (if(attr(weights, "unit")=="share") c(r$premium[-1,Names[i]],NA) else 1) *
+#         exp(r$opReturn[,Names[i]])
+#       sumWeights <- sumWeights + weights[i] *
+#         (if(attr(weights, "unit")=="share") c(r$premium[-1,Names[i]],NA) else 1)
+#     }
+#   }
+#   pfReturn <- log(pfReturn / sumWeights)
+#   
+#   r$pfReturn <- data.frame(Date=r$price[,1], pfReturn=pfReturn)
   r$V0 <- V0
   r$compWeights <- weights
   r$compNames <- Names

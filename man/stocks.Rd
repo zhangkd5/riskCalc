@@ -4,7 +4,8 @@
 \alias{stocks}
 \title{Build Stocks Dataset}
 \usage{
-stocks(data = NULL, Names = NULL, date.col = 1, price.col = -1)
+stocks(data = NULL, Names = NULL, date.col = 1, price.col = -1,
+  rate.col = NULL, divRate.col = NULL)
 }
 \arguments{
 \item{data}{a data frame, the raw data that contains stock prices.}
@@ -14,6 +15,10 @@ stocks(data = NULL, Names = NULL, date.col = 1, price.col = -1)
 \item{date.col}{an integer or a character string that specifies the date column in data.}
 
 \item{price.col}{a vector of integers or character strings that specifies the price columns in data.}
+
+\item{rate.col}{an integer or a string that specifies the column for risk free rate.}
+
+\item{divRate.col}{a vector of integers or strings that specifies the columns for dividend rates.}
 }
 \value{
 An object of class \code{stocksData}, which stores the structured data of stocks.

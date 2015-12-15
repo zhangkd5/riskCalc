@@ -5,7 +5,7 @@
 \title{Build Options Dataset}
 \usage{
 addOptions(stocksData, optionNames = NULL, underlyingNames, Date = NULL,
-  impVol, strike, moneyness, callput, maturity, rate, divRate = 0)
+  impVol, strike, moneyness, callput, maturity)
 }
 \arguments{
 \item{stocksData}{a \code{stocksData} object, the stocks dataset that contains underlying information.}
@@ -23,10 +23,6 @@ addOptions(stocksData, optionNames = NULL, underlyingNames, Date = NULL,
 \item{callput}{a character vector which can either take \code{"call"} or \code{"put"}.}
 
 \item{maturity}{time to maturity of the options.}
-
-\item{rate}{the risk-free rate for each date.}
-
-\item{divRate}{the dividend rate for (the underlying of) each options.}
 }
 \value{
 An object of class \code{optionsData}, which stores the structured data of options and stocks.

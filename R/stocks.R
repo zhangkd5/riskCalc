@@ -6,6 +6,8 @@
 #' @param Names a character vector, the symbols of the stocks.
 #' @param date.col an integer or a character string that specifies the date column in data.
 #' @param price.col a vector of integers or character strings that specifies the price columns in data.
+#' @param rate.col an integer or a string that specifies the column for risk free rate.
+#' @param divRate.col a vector of integers or strings that specifies the columns for dividend rates.
 #' 
 #' @return An object of class \code{stocksData}, which stores the structured data of stocks.
 #' 
@@ -16,14 +18,15 @@
 #' and the data is regarded as in reverse chronological order.
 #' 
 #' @export
-stocks <- function(data=NULL, Names=NULL, date.col=1, price.col=-1)
+stocks <- function(data=NULL, Names=NULL, date.col=1, price.col=-1, rate.col=NULL, divRate.col=NULL)
 {
   data <- as.data.frame(data)
   n <- nrow(data)
   if(n == 0) {
     return(structure(list(price = data.frame(Date=numeric(0)), logReturn = data.frame(Date=numeric(0)), 
-                          Dim = 0L, N = 0L, stockNames = character(0)), 
-                     class = "stocksData"))
+                          rate = data.frame(Date=numeric(0), rate=numeric(0)), 
+                          divRate = data.frame(Date=numeric(0)), Dim = 0L, N = 0L, 
+                          stockNames = character(0)), class = "stocksData"))
   }
   if(is.numeric(price.col) && any(price.col<0))
     price.col <- setdiff(seq_along(data), -price.col)
@@ -33,11 +36,30 @@ stocks <- function(data=NULL, Names=NULL, date.col=1, price.col=-1)
     warning("There should be at most one date column. Taking the first specified column.")
     date.col <- date.col[1]
   }
+  if(length(rate.col)>1) {
+    warning("There should be at most one rate column. Taking the first specified column.")
+    rate.col <- rate.col[1]
+  }
   D <- length(price.col)
   price <- data.matrix(data[,price.col,drop=FALSE])
+  if(!is.null(rate.col)) {
+    rate <- data[,rate.col]
+  }
+  else
+    rate <- rep(0, n)
+  if(!is.null(divRate.col)) {
+    divRate <- data.matrix(data)[,divRate.col,drop=FALSE]
+  }
+  else
+    divRate <- matrix(0, nrow=n, ncol=D)
+  
   if(!is.null(date.col)) {
     Date <- as.Date(data[,date.col])
-    price <- price[order(Date)[n:1],,drop=FALSE]
+    ord <- order(Date)[n:1]
+    Date <- Date[ord]
+    price <- price[ord,,drop=FALSE]
+    rate <- rate[ord]
+    divRate <- divRate[ord,,drop=FALSE]
   } else
     Date <- n:1
   
@@ -46,9 +68,10 @@ stocks <- function(data=NULL, Names=NULL, date.col=1, price.col=-1)
   if(is.null(Names)) {
     Names <- paste0("S", seq(D))
   }
-  colnames(price) <- colnames(logReturn) <- Names
+  colnames(price) <- colnames(logReturn) <- colnames(divRate) <- Names
   
   structure(list(price = data.frame(Date, price), logReturn = data.frame(Date, logReturn), 
+                 rate = data.frame(Date, rate), divRate = data.frame(Date, divRate),
                  Dim = D, N = n, stockNames = Names), class = "stocksData")
 }
 
@@ -77,11 +100,13 @@ merge.stocksData <- function(x, y, ...)
   keep <- c("Date", setdiff(y$stockNames, x$stockNames))
   price <- merge(x$price, y$price[,keep,drop=FALSE], by="Date", sort=FALSE)
   logReturn <- merge(x$logReturn, y$logReturn[,keep,drop=FALSE], by="Date", sort=FALSE)
+  rate <- merge(x$rate, y$rate[,1,drop=FALSE], sort=FALSE)
+  divRate <- merge(x$divRate, y$divRate[,keep,drop=FALSE], by="Date", sort=FALSE)
   Dim <- ncol(price)-1
   N <- nrow(price)
   stockNames <- colnames(price)[-1]
-  structure(list(price = price, logReturn = logReturn, Dim = Dim, N = N, stockNames = stockNames),
-            class = "stocksData")
+  structure(list(price = price, logReturn = logReturn, rate = rate, divRate = divRate, 
+                 Dim = Dim, N = N, stockNames = stockNames), class = "stocksData")
 }
 
 #' Subsetting Options or Stocks Dataset
@@ -107,7 +132,8 @@ subset.stocksData <- function(x, select, ...)
   Date <- x$price[,1,drop=FALSE]
   price <- cbind(Date, subset(x$price[,-1,drop=FALSE], select=select))
   logReturn <- cbind(Date, subset(x$logReturn[,-1,drop=FALSE], select=select))
-  structure(list(price = price, logReturn = logReturn, Dim = ncol(price)-1, N = x$N, 
-                 stockNames = colnames(price)[-1]), class = "stocksData")
+  divRate <- cbind(Date, subset(x$divRate[,-1,drop=FALSE], select=select))
+  structure(list(price = price, logReturn = logReturn, rate = x$rate, divRate = divRate,
+                 Dim = ncol(price)-1, N = x$N, stockNames = colnames(price)[-1]), class = "stocksData")
 }
 

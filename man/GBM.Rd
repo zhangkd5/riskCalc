@@ -3,32 +3,33 @@
 \name{GBM}
 \alias{GBM}
 \alias{GBM.default}
-\alias{GBM.portfolioData}
 \alias{GBM.stocksData}
 \title{GBM Model Fitting}
 \usage{
 GBM(...)
 
-\method{GBM}{default}(drift, volatility, S0, corr = NULL, Names = NULL)
+\method{GBM}{default}(drift, volatility, S0, corr = NULL, Names = NULL,
+  rate = 0, divRate = 0, ...)
 
 \method{GBM}{stocksData}(data, len = 5, lambda = NULL,
-  method = c("unweighted", "exp-weighted"))
-
-\method{GBM}{portfolioData}(data, len = 5, lambda = NULL,
-  method = c("unweighted", "exp-weighted"))
+  method = c("unweighted", "exp-weighted"), ...)
 }
 \arguments{
-\item{...}{arguments to be passed to methods.}
+\item{...}{arguments to be passed to or from methods.}
 
 \item{drift}{a vector or matrix, which manually sets the drift of the model.}
 
 \item{volatility}{a vector or matrix, which manually sets the volatility.}
 
-\item{S0}{numerical vecotr, the spot price.}
+\item{S0}{a vector or matrix, which specifies the spot price.}
 
 \item{corr}{a list of correlation matrices.}
 
 \item{Names}{a character vector that specifies the symbols of the stocks.}
+
+\item{rate}{a numerical scalar or vector specifying the risk free rate.}
+
+\item{divRate}{a scalar, vector or matrix, which specifies the dividend rates.}
 
 \item{data}{an object of class or inherited from \code{stocksData}.}
 

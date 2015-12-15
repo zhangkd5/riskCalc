@@ -89,7 +89,7 @@ realizedLoss.optionsData <- function(data, TimeLen, V0=NULL, ...)
     FV <- c(rep(NA, TimeLen), 
             BSPrice(data$price[seq(data$N-TimeLen),data$underlying[i]], data$strike[-seq(TimeLen),i+1], 
                     data$rate[seq(data$N-TimeLen),2], data$impVol[seq(data$N-TimeLen),i+1], 
-                    data$maturity[i], data$callput[i], data$divRate[seq(data$N-TimeLen),i+1]))
+                    data$maturity[i], data$callput[i], data$divRate[seq(data$N-TimeLen),data$underlying[i]]))
     loss[,data$optionName[i]] <- V0 * (1 - FV / data$premium[,i+1])
   }
   return(data.matrix(loss))

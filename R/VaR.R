@@ -64,7 +64,7 @@ VaR.portfolioData <- function(data, TimeLen=5, conf.level=0.99,
       idx <- match(Name, data$optionNames)
       und <- data$underlying[idx]
       delta <- BSDelta(data$price[,und], data$strike[,Name], data$rate[,2], 
-                       data$impVol[,Name], data$maturity[idx], data$callput[idx], data$divRate[,Name])
+                       data$impVol[,Name], data$maturity[idx], data$callput[idx], data$divRate[,und])
       i.w <- match(und, data$stockNames)
       i.raw <- match(Name, data$compNames)
       w[,i.w] <- w[,i.w] + delta * data$price[,und] * w.raw[,i.raw] / data$premium[,Name]
@@ -91,7 +91,7 @@ VaR.portfolioData <- function(data, TimeLen=5, conf.level=0.99,
           und <- data$underlying[idx]
           undPrice <- data$price[nr,und] * exp(stkRet[nr:(nr+lookback-1),und])
           newPremium <- BSPrice(undPrice, data$strike[nr,idx+1], data$rate[nr,2], data$impVol[nr,idx+1],
-                                data$maturity[idx]-TimeLen/252, data$callput[idx], data$divRate[nr,idx+1])
+                                data$maturity[idx]-TimeLen/252, data$callput[idx], data$divRate[nr,und])
           Vhist <- Vhist + w.raw[nr,i] * (newPremium / data$premium[nr,idx+1])
         }
       }
@@ -112,7 +112,7 @@ VaR.portfolioData <- function(data, TimeLen=5, conf.level=0.99,
           und <- data$underlying[idx]
           undPrice <- data$price[nr,und] * exp(stkRet[,und])
           newPremium <- BSPrice(undPrice, data$strike[nr,idx+1], data$rate[nr,2], data$impVol[nr,idx+1],
-                                data$maturity[idx]-TimeLen/252, data$callput[idx], data$divRate[nr,idx+1])
+                                data$maturity[idx]-TimeLen/252, data$callput[idx], data$divRate[nr,und])
           VSim <- VSim + w.raw[nr,i] * (newPremium / data$premium[nr,idx+1])
         }
       }

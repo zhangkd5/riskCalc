@@ -2,12 +2,14 @@
 #' 
 #' A generic function which is the creator for an S3 class of multivariate GBM model.
 #' 
-#' @param ... arguments to be passed to methods.
+#' @param ... arguments to be passed to or from methods.
 #' @param drift a vector or matrix, which manually sets the drift of the model.
 #' @param volatility a vector or matrix, which manually sets the volatility.
-#' @param S0 numerical vecotr, the spot price.
+#' @param S0 a vector or matrix, which specifies the spot price.
 #' @param corr a list of correlation matrices.
 #' @param Names a character vector that specifies the symbols of the stocks.
+#' @param rate a numerical scalar or vector specifying the risk free rate.
+#' @param divRate a scalar, vector or matrix, which specifies the dividend rates.
 #' @param data an object of class or inherited from \code{stocksData}.
 #' @param len the window size in years.
 #' @param lambda the decay factor used by exponential weighting method. 
@@ -23,30 +25,45 @@
 #' See model documentation for details. 
 #' 
 #' @seealso \code{\link{stocks}}, \code{\link{addOptions}}, \code{\link{portfolio}}. 
+#' 
+#' @export
 GBM <- function(...) UseMethod("GBM")
 
 #' @rdname GBM
 #' @export
-GBM.default <- function(drift, volatility, S0, corr=NULL, Names=NULL) {
+GBM.default <- function(drift, volatility, S0, corr=NULL, Names=NULL, rate=0, divRate=0, ...) 
+{
   if(is.vector(drift, "numeric"))
     drift <- t(drift)
   else
     drift <- as.matrix(drift)
+  D <- ncol(drift)
+  n <- nrow(drift)
+  
   if(is.vector(volatility, "numeric"))
     volatility <- t(volatility)
   else
     volatility <- as.matrix(volatility)
+  
   if(is.vector(S0, "numeric"))
     S0 <- t(S0)
   else
     S0 <- as.matrix(S0)
-  D <- ncol(drift)
-  n <- nrow(drift)
+  
+  if(is.vector(divRate, "numeric")) {
+    divRate <- t(rep(divRate, length.out=D))
+  }
+  else
+    divRate <- as.matrix(divRate)
+
   if(is.null(corr)) corr <- rep(0, n)
   if(is.vector(corr, "numeric")) 
     corr <- lapply(corr, function(rho, D) diag(rep(1-rho, D))+rho, D=D)
   corr <- rep(corr, length.out=n)
-  r <- stocks(S0, Names=Names, date.col=NULL, price.col=seq(D))
+  
+  r <- stocks(cbind(S0, rate, divRate), Names=Names, date.col=NULL, price.col=seq(D), 
+              rate.col=D+1, divRate.col=seq(D+2, 2*D+1))
+  
   colnames(drift) <- colnames(volatility) <- r$stockNames
   corr <- lapply(corr, function(m){dimnames(m)<-rep(list(r$stockNames),2);m})
   r$mu <- data.frame(Date=n:1, drift)
@@ -60,7 +77,7 @@ GBM.default <- function(drift, volatility, S0, corr=NULL, Names=NULL) {
 #' @import plyr
 #' @export
 GBM.stocksData <- function(data, len = 5, lambda = NULL, 
-                           method = c("unweighted", "exp-weighted"))
+                           method = c("unweighted", "exp-weighted"), ...)
 {
   method <- match.arg(method)
   D <- data$Dim
@@ -103,23 +120,23 @@ GBM.stocksData <- function(data, len = 5, lambda = NULL,
   return(r)
 }
 
-#' @rdname GBM
-#' @export
-GBM.portfolioData <- function(data, len = 5, lambda = NULL, 
-                              method = c("unweighted", "exp-weighted"))
-{
-  r <- NextMethod()
-  if(r$method == "exp-weighted") {
-    l <- computeDriftAndVolEWMA(r$pfReturn[,2], lambda=r$lambda)
-  }
-  else {
-    l <- computeDriftAndVol(r$pfReturn[,2], len=r$len)
-  }
-  r$pfMu <- data.frame(Date=r$price[,1], mu=l[,1])
-  r$pfVol <- data.frame(Date=r$price[,1], vol=l[,2])
-  class(r) <- unique(c("GBM", class(r)))
-  return(r)
-}
+# #' @rdname GBM
+# #' @export
+# GBM.portfolioData <- function(data, len = 5, lambda = NULL, 
+#                               method = c("unweighted", "exp-weighted"))
+# {
+#   r <- NextMethod()
+#   if(r$method == "exp-weighted") {
+#     l <- computeDriftAndVolEWMA(r$pfReturn[,2], lambda=r$lambda)
+#   }
+#   else {
+#     l <- computeDriftAndVol(r$pfReturn[,2], len=r$len)
+#   }
+#   r$pfMu <- data.frame(Date=r$price[,1], mu=l[,1])
+#   r$pfVol <- data.frame(Date=r$price[,1], vol=l[,2])
+#   class(r) <- unique(c("GBM", class(r)))
+#   return(r)
+# }
 
 #' @rdname subset.stocksData
 #' @export
