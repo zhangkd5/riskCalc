@@ -25,13 +25,14 @@ backtest <- function(object, testLen.years=1)
   loss <- realizedLoss(object$data, object$TimeLen)
   exceed <- loss > data.matrix(object$VaR[,-1,drop=FALSE])
   exceedRate <- sapply(seq(object$data$N - testLen+1), function(nr) {
-    colMeans(exceed[nr:(nr+testLen-1),], na.rm=TRUE)
+    colMeans(exceed[nr:(nr+testLen-1),,drop=FALSE], na.rm=TRUE)
   })
   if(is.matrix(exceedRate)) 
     exceedRate <- t(exceedRate)
   else
     exceedRate <- as.matrix(exceedRate)
   exceedRate <- rbind(exceedRate, matrix(NA_real_, nrow=testLen-1, ncol=ncol(exceedRate)))
+  dimnames(exceedRate) <- dimnames(loss)
   r$actualLoss <- data.frame(Date=object$data$price[,1], loss)
   r$exceedRate <- data.frame(Date=object$data$price[,1], exceedRate)
   r$testLen.years <- testLen.years
